@@ -25,6 +25,10 @@ This repository implements the Tak (Tarai) function in four ways:
 - Lazy evaluation using an enum
 
 Each implementation also has a checked variant: `tarai_naive_checked`, `tarai_memo_checked`, `tarai_lazy_closure_checked`, and `tarai_lazy_enum_checked`. They return `None` if a subtraction during evaluation would underflow `i32`; otherwise, they return `Some(result)`.
+The lazy variants defer the third recursive call until it is needed. The closure
+variant also defers the subtraction used to construct that call, while the enum
+variant performs the subtraction first. As a result, the checked variants can
+evaluate different subtractions at boundary inputs.
 
 ```rust
 assert_eq!(tarai::tarai_memo_checked(10, 5, 0), Some(10));

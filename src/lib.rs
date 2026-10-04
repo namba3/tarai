@@ -142,6 +142,8 @@ pub fn tarai_lazy_closure(x: i32, y: i32, z: i32) -> i32 {
 /// 第 3 引数をクロージャーで遅延評価し、減算アンダーフローを検出して竹内関数を計算します。
 ///
 /// `i32` の減算が範囲外になる場合は `None` を返します。
+/// 第 3 引数に対応する再帰呼び出しと、その呼び出し内の減算は遅延され、
+/// 結果を得るためにその呼び出しが必要な場合にだけ評価されます。
 ///
 /// # 使用例
 ///
@@ -206,6 +208,8 @@ pub fn tarai_lazy_enum(x: i32, y: i32, z: i32) -> i32 {
 /// 第 3 引数を enum で遅延評価し、減算アンダーフローを検出して竹内関数を計算します。
 ///
 /// `i32` の減算が範囲外になる場合は `None` を返します。
+/// 第 3 引数に対応する再帰呼び出しは遅延されますが、その引数を作る減算は
+/// 呼び出しごとに先に評価されます。
 ///
 /// # 使用例
 ///
@@ -322,6 +326,27 @@ mod tests {
         assert_eq!(
             super::tarai_lazy_enum_checked(input.0, input.1, input.2),
             Some(i32::MIN)
+        );
+    }
+
+    #[test]
+    fn checked_implementations_accept_unused_minimum_argument_in_base_case() {
+        let input = (0, 1, i32::MIN);
+        assert_eq!(
+            super::tarai_naive_checked(input.0, input.1, input.2),
+            Some(1)
+        );
+        assert_eq!(
+            super::tarai_memo_checked(input.0, input.1, input.2),
+            Some(1)
+        );
+        assert_eq!(
+            super::tarai_lazy_closure_checked(input.0, input.1, input.2),
+            Some(1)
+        );
+        assert_eq!(
+            super::tarai_lazy_enum_checked(input.0, input.1, input.2),
+            Some(1)
         );
     }
 
