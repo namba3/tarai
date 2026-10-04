@@ -91,3 +91,47 @@ Each sample alternates between forward and reverse implementation order, but mea
 ```sh
 cargo bench
 ```
+
+### Results
+
+The following results were measured with `cargo +stable bench` on 2026-10-05.
+Values are the median of seven samples in ns/call. Iteration counts vary by
+implementation and are calibrated to target about 100 ms per sample. Treat these
+as reference values: CPU load and the state of the virtualized environment can
+affect measurements.
+
+- CPU: AMD Ryzen 9 9900X, 12 cores / 24 threads
+- OS: Linux 6.18.40, WSL2
+- Rust: stable `rustc 1.99.0 (b940084d7 2026-09-28)`
+- Profile: optimized (`cargo bench`)
+
+Unchecked implementations:
+
+| Input `(x, y, z)` | Naive recursion | Memoized recursion | Closure lazy evaluation | Enum lazy evaluation |
+|---|---:|---:|---:|---:|
+| `(6, 3, 0)` | 668.39 | 2,632.56 | 41.16 | 31.77 |
+| `(8, 4, 0)` | 12,024.06 | 4,560.17 | 78.92 | 60.27 |
+| `(10, 5, 0)` | 337,105.09 | 7,635.25 | 130.44 | 96.29 |
+| `(12, 6, 0)` | 11,939,468.56 | 12,310.66 | 159.66 | 132.60 |
+| `(14, 7, 0)` | 605,238,023.00 | 16,916.51 | 244.37 | 183.27 |
+| `(10, 7, 4)` | 637.07 | 2,802.00 | 46.28 | 34.49 |
+| `(10, 5, 3)` | 1,390.85 | 3,031.60 | 43.41 | 34.94 |
+
+Checked implementations on inputs that complete successfully:
+
+| Input `(x, y, z)` | Naive recursion | Memoized recursion | Closure lazy evaluation | Enum lazy evaluation |
+|---|---:|---:|---:|---:|
+| `(6, 3, 0)` | 779.24 | 2,720.76 | 49.65 | 37.73 |
+| `(8, 4, 0)` | 14,251.66 | 4,449.59 | 79.92 | 62.68 |
+| `(10, 5, 0)` | 419,363.53 | 8,186.25 | 146.82 | 105.57 |
+| `(12, 6, 0)` | 15,493,072.25 | 12,735.74 | 185.83 | 141.22 |
+| `(14, 7, 0)` | 725,736,747.00 | 17,077.28 | 280.62 | 211.67 |
+| `(10, 7, 4)` | 701.05 | 2,547.04 | 44.18 | 33.32 |
+| `(10, 5, 3)` | 1,889.63 | 3,279.97 | 52.22 | 41.02 |
+
+For the checked underflow input `(i32::MIN + 1, i32::MIN, 0)`, all
+implementations return `None`. Their median times were:
+
+| Naive recursion | Memoized recursion | Closure lazy evaluation | Enum lazy evaluation |
+|---:|---:|---:|---:|
+| 3.03 ns | 33.86 ns | 4.42 ns | 3.87 ns |
