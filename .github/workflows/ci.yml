@@ -31,6 +31,9 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --all-targets --locked -- -D warnings
 
+      - name: Check documentation
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --locked
+
       - name: Run benchmarks
         run: cargo bench --locked
 
