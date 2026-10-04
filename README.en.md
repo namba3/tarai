@@ -86,6 +86,7 @@ Normal cases scale `x` and `y` from `(6, 3, 0)` through `(14, 7, 0)`, and also
 vary `y` and `z` while keeping `x = 10`. Every implementation uses the same
 inputs, and results are grouped by input case.
 Checked variants are also measured on a subtraction-underflow case.
+Implementations are measured sequentially in a fixed order within one process. System load and CPU frequency changes can affect the results; treat them as local references and avoid direct comparison across different environments.
 
 ```sh
 cargo bench
