@@ -62,7 +62,10 @@ cargo test
 ## Benchmark
 
 The benchmarks run on stable Rust. Each case is warmed up twice, then measured
-seven times; the median and range are reported.
+seven times; the median and range are reported. Iterations are calibrated for
+each input and implementation to target 100 ms per sample, capped at `1 << 24`
+iterations. A sample can be shorter when it reaches that cap; the actual count
+is printed with each result.
 Implementations are called through static dispatch, without function pointers.
 Normal cases scale `x` and `y` from `(6, 3, 0)` through `(14, 7, 0)`, and also
 vary `y` and `z` while keeping `x = 10`. Every implementation uses the same

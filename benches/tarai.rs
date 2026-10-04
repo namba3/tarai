@@ -55,6 +55,13 @@ fn main() {
             "optimized"
         }
     );
+    println!(
+        "Protocol: target sample {} ms, maximum {} iterations/sample, {} warmup rounds, {} measured samples",
+        TARGET_SAMPLE_TIME.as_millis(),
+        MAX_ITERATIONS,
+        WARMUP_ROUNDS,
+        SAMPLE_ROUNDS
+    );
     println!("Benchmark results (nanoseconds per call):");
 
     benchmark_unchecked_cases!("tarai_naive", tarai::tarai_naive);
