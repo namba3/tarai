@@ -30,6 +30,11 @@ variant also defers the subtraction used to construct that call, while the enum
 variant performs the subtraction first. As a result, the checked variants can
 evaluate different subtractions at boundary inputs.
 
+Large inputs can increase runtime and memory use, and deep recursion can exhaust
+the stack. Memoization still uses recursion, so deep inputs can exhaust the stack.
+Checked variants detect subtraction underflow; they do not limit runtime, memory
+use, or stack use.
+
 ```rust
 assert_eq!(tarai::tarai_memo_checked(10, 5, 0), Some(10));
 assert_eq!(tarai::tarai_memo_checked(i32::MIN + 1, i32::MIN, 0), None);

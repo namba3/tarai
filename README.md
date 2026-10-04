@@ -27,6 +27,8 @@ T(x, y, z) =
 各方式には、減算のアンダーフローを検出する checked 版もあります。`tarai_naive_checked`、`tarai_memo_checked`、`tarai_lazy_closure_checked`、`tarai_lazy_enum_checked` は、計算途中で `i32` の範囲を超える減算が必要になった場合に `None` を返し、それ以外は `Some(結果)` を返します。
 遅延評価版では、第 3 引数の再帰呼び出しが必要になったときにその呼び出しを評価します。クロージャー版は、その引数を作る減算も遅延しますが、enum 版は減算を先に行います。そのため、境界値では checked 版ごとに評価される減算が異なる場合があります。
 
+入力が大きいと実行時間やメモリ使用量が増え、再帰の深さによってはスタックを使い切ることがあります。メモ化版も再帰を使うため、深い入力ではスタック枯渇の可能性があります。checked 版が検出するのは減算アンダーフローであり、実行時間、メモリ使用量、スタック使用量の上限ではありません。
+
 ```rust
 assert_eq!(tarai::tarai_memo_checked(10, 5, 0), Some(10));
 assert_eq!(tarai::tarai_memo_checked(i32::MIN + 1, i32::MIN, 0), None);
