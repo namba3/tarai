@@ -54,6 +54,7 @@ cargo test
 
 The benchmarks run on stable Rust. Each case is warmed up twice, then measured
 seven times; the median and range are reported.
+Implementations are called through static dispatch, without function pointers.
 
 ```sh
 cargo bench

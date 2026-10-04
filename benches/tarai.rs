@@ -3,27 +3,23 @@ use std::{
     time::{Duration, Instant},
 };
 
-type TaraiFn = fn(i32, i32, i32) -> i32;
-type CheckedTaraiFn = fn(i32, i32, i32) -> Option<i32>;
-
 const CASES: [((i32, i32, i32), i32); 2] = [((10, 5, 0), 10), ((12, 6, 0), 12)];
 
-const IMPLEMENTATIONS: [(&str, TaraiFn); 4] = [
-    ("tarai_naive", tarai::tarai_naive),
-    ("tarai_memo", tarai::tarai_memo),
-    ("tarai_lazy_closure", tarai::tarai_lazy_closure),
-    ("tarai_lazy_enum", tarai::tarai_lazy_enum),
-];
+macro_rules! benchmark_unchecked_cases {
+    ($name:literal, $implementation:path) => {
+        for &((x, y, z), expected) in &CASES {
+            benchmark(x, y, z, $name, $implementation, expected);
+        }
+    };
+}
 
-const CHECKED_IMPLEMENTATIONS: [(&str, CheckedTaraiFn); 4] = [
-    ("tarai_naive_checked", tarai::tarai_naive_checked),
-    ("tarai_memo_checked", tarai::tarai_memo_checked),
-    (
-        "tarai_lazy_closure_checked",
-        tarai::tarai_lazy_closure_checked,
-    ),
-    ("tarai_lazy_enum_checked", tarai::tarai_lazy_enum_checked),
-];
+macro_rules! benchmark_checked_cases {
+    ($name:literal, $implementation:path) => {
+        for &((x, y, z), expected) in &CASES {
+            benchmark(x, y, z, $name, $implementation, Some(expected));
+        }
+    };
+}
 
 const TARGET_SAMPLE_TIME: Duration = Duration::from_millis(100);
 const MAX_ITERATIONS: u64 = 1 << 24;
@@ -47,28 +43,24 @@ fn main() {
     );
     println!("Benchmark results (nanoseconds per call):");
 
-    for &(name, implementation) in &IMPLEMENTATIONS {
-        for &((x, y, z), expected) in &CASES {
-            benchmark(x, y, z, name, implementation, expected);
-        }
-    }
+    benchmark_unchecked_cases!("tarai_naive", tarai::tarai_naive);
+    benchmark_unchecked_cases!("tarai_memo", tarai::tarai_memo);
+    benchmark_unchecked_cases!("tarai_lazy_closure", tarai::tarai_lazy_closure);
+    benchmark_unchecked_cases!("tarai_lazy_enum", tarai::tarai_lazy_enum);
 
-    for &(name, implementation) in &CHECKED_IMPLEMENTATIONS {
-        for &((x, y, z), expected) in &CASES {
-            benchmark(x, y, z, name, implementation, Some(expected));
-        }
-    }
+    benchmark_checked_cases!("tarai_naive_checked", tarai::tarai_naive_checked);
+    benchmark_checked_cases!("tarai_memo_checked", tarai::tarai_memo_checked);
+    benchmark_checked_cases!(
+        "tarai_lazy_closure_checked",
+        tarai::tarai_lazy_closure_checked
+    );
+    benchmark_checked_cases!("tarai_lazy_enum_checked", tarai::tarai_lazy_enum_checked);
 }
 
-fn benchmark<T>(
-    x: i32,
-    y: i32,
-    z: i32,
-    name: &str,
-    implementation: fn(i32, i32, i32) -> T,
-    expected: T,
-) where
+fn benchmark<T, F>(x: i32, y: i32, z: i32, name: &str, implementation: F, expected: T)
+where
     T: std::fmt::Debug + PartialEq,
+    F: Fn(i32, i32, i32) -> T + Copy,
 {
     assert_eq!(
         implementation(x, y, z),
@@ -101,7 +93,10 @@ fn benchmark<T>(
     );
 }
 
-fn calibrate_iterations<T>(implementation: fn(i32, i32, i32) -> T, x: i32, y: i32, z: i32) -> u64 {
+fn calibrate_iterations<T, F>(implementation: F, x: i32, y: i32, z: i32) -> u64
+where
+    F: Fn(i32, i32, i32) -> T + Copy,
+{
     let mut iterations = 1;
     loop {
         if run_batch(implementation, x, y, z, iterations) >= TARGET_SAMPLE_TIME
@@ -113,13 +108,10 @@ fn calibrate_iterations<T>(implementation: fn(i32, i32, i32) -> T, x: i32, y: i3
     }
 }
 
-fn run_batch<T>(
-    implementation: fn(i32, i32, i32) -> T,
-    x: i32,
-    y: i32,
-    z: i32,
-    iterations: u64,
-) -> Duration {
+fn run_batch<T, F>(implementation: F, x: i32, y: i32, z: i32, iterations: u64) -> Duration
+where
+    F: Fn(i32, i32, i32) -> T + Copy,
+{
     let start = Instant::now();
     for _ in 0..iterations {
         black_box(implementation(black_box(x), black_box(y), black_box(z)));
