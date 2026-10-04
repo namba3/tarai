@@ -199,6 +199,11 @@ mod tests {
                     let expected = super::tarai_naive(x, y, z);
                     assert_eq!(super::tarai_memo(x, y, z), expected, "memo({x}, {y}, {z})");
                     assert_eq!(
+                        super::tarai_memo_checked(x, y, z),
+                        Some(expected),
+                        "memo_checked({x}, {y}, {z})"
+                    );
+                    assert_eq!(
                         super::tarai_lazy_closure(x, y, z),
                         expected,
                         "lazy_closure({x}, {y}, {z})"
