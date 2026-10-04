@@ -84,7 +84,7 @@ is printed with each result.
 Implementations are called through static dispatch, without function pointers.
 Normal cases scale `x` and `y` from `(6, 3, 0)` through `(14, 7, 0)`, and also
 vary `y` and `z` while keeping `x = 10`. Every implementation uses the same
-inputs.
+inputs, and results are grouped by input case.
 Checked variants are also measured on a subtraction-underflow case.
 
 ```sh

@@ -16,25 +16,6 @@ const CASES: [((i32, i32, i32), i32); 7] = [
 ];
 const UNDERFLOW_CASES: [((i32, i32, i32), Option<i32>); 1] = [((i32::MIN + 1, i32::MIN, 0), None)];
 
-macro_rules! benchmark_unchecked_cases {
-    ($name:literal, $implementation:path) => {
-        for &((x, y, z), expected) in &CASES {
-            benchmark(x, y, z, $name, $implementation, expected);
-        }
-    };
-}
-
-macro_rules! benchmark_checked_cases {
-    ($name:literal, $implementation:path) => {
-        for &((x, y, z), expected) in &CASES {
-            benchmark(x, y, z, $name, $implementation, Some(expected));
-        }
-        for &((x, y, z), expected) in &UNDERFLOW_CASES {
-            benchmark(x, y, z, $name, $implementation, expected);
-        }
-    };
-}
-
 const TARGET_SAMPLE_TIME: Duration = Duration::from_millis(100);
 const MAX_ITERATIONS: u64 = 1 << 24;
 const WARMUP_ROUNDS: usize = 2;
@@ -64,18 +45,96 @@ fn main() {
     );
     println!("Benchmark results (nanoseconds per call):");
 
-    benchmark_unchecked_cases!("tarai_naive", tarai::tarai_naive);
-    benchmark_unchecked_cases!("tarai_memo", tarai::tarai_memo);
-    benchmark_unchecked_cases!("tarai_lazy_closure", tarai::tarai_lazy_closure);
-    benchmark_unchecked_cases!("tarai_lazy_enum", tarai::tarai_lazy_enum);
+    for &((x, y, z), expected) in &CASES {
+        benchmark_input_case(x, y, z, expected);
+    }
 
-    benchmark_checked_cases!("tarai_naive_checked", tarai::tarai_naive_checked);
-    benchmark_checked_cases!("tarai_memo_checked", tarai::tarai_memo_checked);
-    benchmark_checked_cases!(
-        "tarai_lazy_closure_checked",
-        tarai::tarai_lazy_closure_checked
+    for &((x, y, z), expected) in &UNDERFLOW_CASES {
+        benchmark_underflow_case(x, y, z, expected);
+    }
+}
+
+fn benchmark_input_case(x: i32, y: i32, z: i32, expected: i32) {
+    println!("\nInput case ({x}, {y}, {z}):");
+    benchmark(x, y, z, "tarai_naive", tarai::tarai_naive, expected);
+    benchmark(x, y, z, "tarai_memo", tarai::tarai_memo, expected);
+    benchmark(
+        x,
+        y,
+        z,
+        "tarai_lazy_closure",
+        tarai::tarai_lazy_closure,
+        expected,
     );
-    benchmark_checked_cases!("tarai_lazy_enum_checked", tarai::tarai_lazy_enum_checked);
+    benchmark(x, y, z, "tarai_lazy_enum", tarai::tarai_lazy_enum, expected);
+    benchmark(
+        x,
+        y,
+        z,
+        "tarai_naive_checked",
+        tarai::tarai_naive_checked,
+        Some(expected),
+    );
+    benchmark(
+        x,
+        y,
+        z,
+        "tarai_memo_checked",
+        tarai::tarai_memo_checked,
+        Some(expected),
+    );
+    benchmark(
+        x,
+        y,
+        z,
+        "tarai_lazy_closure_checked",
+        tarai::tarai_lazy_closure_checked,
+        Some(expected),
+    );
+    benchmark(
+        x,
+        y,
+        z,
+        "tarai_lazy_enum_checked",
+        tarai::tarai_lazy_enum_checked,
+        Some(expected),
+    );
+}
+
+fn benchmark_underflow_case(x: i32, y: i32, z: i32, expected: Option<i32>) {
+    println!("\nChecked input case ({x}, {y}, {z}):");
+    benchmark(
+        x,
+        y,
+        z,
+        "tarai_naive_checked",
+        tarai::tarai_naive_checked,
+        expected,
+    );
+    benchmark(
+        x,
+        y,
+        z,
+        "tarai_memo_checked",
+        tarai::tarai_memo_checked,
+        expected,
+    );
+    benchmark(
+        x,
+        y,
+        z,
+        "tarai_lazy_closure_checked",
+        tarai::tarai_lazy_closure_checked,
+        expected,
+    );
+    benchmark(
+        x,
+        y,
+        z,
+        "tarai_lazy_enum_checked",
+        tarai::tarai_lazy_enum_checked,
+        expected,
+    );
 }
 
 fn benchmark<T, F>(x: i32, y: i32, z: i32, name: &str, implementation: F, expected: T)
