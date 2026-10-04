@@ -15,8 +15,15 @@ const IMPLEMENTATIONS: [(&str, TaraiFn); 4] = [
     ("tarai_lazy_enum", tarai::tarai_lazy_enum),
 ];
 
-const CHECKED_IMPLEMENTATIONS: [(&str, CheckedTaraiFn); 1] =
-    [("tarai_memo_checked", tarai::tarai_memo_checked)];
+const CHECKED_IMPLEMENTATIONS: [(&str, CheckedTaraiFn); 4] = [
+    ("tarai_naive_checked", tarai::tarai_naive_checked),
+    ("tarai_memo_checked", tarai::tarai_memo_checked),
+    (
+        "tarai_lazy_closure_checked",
+        tarai::tarai_lazy_closure_checked,
+    ),
+    ("tarai_lazy_enum_checked", tarai::tarai_lazy_enum_checked),
+];
 
 const TARGET_SAMPLE_TIME: Duration = Duration::from_millis(100);
 const MAX_ITERATIONS: u64 = 1 << 24;

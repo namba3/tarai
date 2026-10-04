@@ -27,6 +27,24 @@ pub fn tarai_naive(x: i32, y: i32, z: i32) -> i32 {
     }
 }
 
+/// 竹内関数を素朴な再帰で計算し、中間値の減算アンダーフローを検出します。
+///
+/// `i32` の減算が範囲外になる場合は `None` を返します。
+pub fn tarai_naive_checked(x: i32, y: i32, z: i32) -> Option<i32> {
+    fn t(x: i32, y: i32, z: i32) -> Option<i32> {
+        if x <= y {
+            Some(y)
+        } else {
+            let a = t(x.checked_sub(1)?, y, z)?;
+            let b = t(y.checked_sub(1)?, z, x)?;
+            let c = t(z.checked_sub(1)?, x, y)?;
+            t(a, b, c)
+        }
+    }
+
+    t(x, y, z)
+}
+
 /// 竹内関数をメモ化再帰で計算します。
 ///
 /// メモは呼び出しごとに作成されます。大きな入力ではメモリ使用量が増えることがあります。
@@ -103,6 +121,25 @@ pub fn tarai_lazy_closure(x: i32, y: i32, z: i32) -> i32 {
     t(x, y, &|| z)
 }
 
+/// 第 3 引数をクロージャーで遅延評価し、減算アンダーフローを検出して竹内関数を計算します。
+///
+/// `i32` の減算が範囲外になる場合は `None` を返します。
+pub fn tarai_lazy_closure_checked(x: i32, y: i32, z: i32) -> Option<i32> {
+    fn t(x: i32, y: i32, z: &dyn Fn() -> Option<i32>) -> Option<i32> {
+        if x <= y {
+            Some(y)
+        } else {
+            let z = z()?;
+            let a = t(x.checked_sub(1)?, y, &|| Some(z))?;
+            let b = t(y.checked_sub(1)?, z, &|| Some(x))?;
+            let c = || t(z.checked_sub(1)?, x, &|| Some(y));
+            t(a, b, &c)
+        }
+    }
+
+    t(x, y, &|| Some(z))
+}
+
 /// 第 3 引数を enum で遅延評価しながら竹内関数を計算します。
 ///
 /// すべての中間値が `i32` の範囲に収まる入力を指定してください。
@@ -129,6 +166,42 @@ pub fn tarai_lazy_enum(x: i32, y: i32, z: i32) -> i32 {
             let b = t(y - 1, z, V::Result(x));
             let c = V::Args {
                 x: z - 1,
+                y: x,
+                z: y,
+            };
+            t(a, b, c)
+        }
+    }
+
+    t(x, y, V::Result(z))
+}
+
+/// 第 3 引数を enum で遅延評価し、減算アンダーフローを検出して竹内関数を計算します。
+///
+/// `i32` の減算が範囲外になる場合は `None` を返します。
+pub fn tarai_lazy_enum_checked(x: i32, y: i32, z: i32) -> Option<i32> {
+    enum V {
+        Args { x: i32, y: i32, z: i32 },
+        Result(i32),
+    }
+    impl V {
+        fn eval(self) -> Option<i32> {
+            match self {
+                V::Args { x, y, z } => t(x, y, V::Result(z)),
+                V::Result(v) => Some(v),
+            }
+        }
+    }
+
+    fn t(x: i32, y: i32, z: V) -> Option<i32> {
+        if x <= y {
+            Some(y)
+        } else {
+            let z = z.eval()?;
+            let a = t(x.checked_sub(1)?, y, V::Result(z))?;
+            let b = t(y.checked_sub(1)?, z, V::Result(x))?;
+            let c = V::Args {
+                x: z.checked_sub(1)?,
                 y: x,
                 z: y,
             };
@@ -172,21 +245,46 @@ mod tests {
     test!(tarai_lazy_enum);
 
     #[test]
-    fn checked_memo_matches_expected_cases() {
+    fn checked_implementations_match_expected_cases() {
         for &((x, y, z), expected) in CASES.iter() {
+            assert_eq!(super::tarai_naive_checked(x, y, z), Some(expected));
             assert_eq!(super::tarai_memo_checked(x, y, z), Some(expected));
+            assert_eq!(super::tarai_lazy_closure_checked(x, y, z), Some(expected));
+            assert_eq!(super::tarai_lazy_enum_checked(x, y, z), Some(expected));
         }
     }
 
     #[test]
-    fn checked_memo_reports_subtraction_underflow() {
+    fn checked_implementations_report_subtraction_underflow() {
+        assert_eq!(super::tarai_naive_checked(i32::MIN + 1, i32::MIN, 0), None);
         assert_eq!(super::tarai_memo_checked(i32::MIN + 1, i32::MIN, 0), None);
+        assert_eq!(
+            super::tarai_lazy_closure_checked(i32::MIN + 1, i32::MIN, 0),
+            None
+        );
+        assert_eq!(
+            super::tarai_lazy_enum_checked(i32::MIN + 1, i32::MIN, 0),
+            None
+        );
     }
 
     #[test]
-    fn checked_memo_accepts_extreme_base_case() {
+    fn checked_implementations_accept_extreme_base_case() {
+        let input = (i32::MIN, i32::MIN, i32::MIN);
         assert_eq!(
-            super::tarai_memo_checked(i32::MIN, i32::MIN, i32::MIN),
+            super::tarai_naive_checked(input.0, input.1, input.2),
+            Some(i32::MIN)
+        );
+        assert_eq!(
+            super::tarai_memo_checked(input.0, input.1, input.2),
+            Some(i32::MIN)
+        );
+        assert_eq!(
+            super::tarai_lazy_closure_checked(input.0, input.1, input.2),
+            Some(i32::MIN)
+        );
+        assert_eq!(
+            super::tarai_lazy_enum_checked(input.0, input.1, input.2),
             Some(i32::MIN)
         );
     }
@@ -199,6 +297,11 @@ mod tests {
                     let expected = super::tarai_naive(x, y, z);
                     assert_eq!(super::tarai_memo(x, y, z), expected, "memo({x}, {y}, {z})");
                     assert_eq!(
+                        super::tarai_naive_checked(x, y, z),
+                        Some(expected),
+                        "naive_checked({x}, {y}, {z})"
+                    );
+                    assert_eq!(
                         super::tarai_memo_checked(x, y, z),
                         Some(expected),
                         "memo_checked({x}, {y}, {z})"
@@ -209,9 +312,19 @@ mod tests {
                         "lazy_closure({x}, {y}, {z})"
                     );
                     assert_eq!(
+                        super::tarai_lazy_closure_checked(x, y, z),
+                        Some(expected),
+                        "lazy_closure_checked({x}, {y}, {z})"
+                    );
+                    assert_eq!(
                         super::tarai_lazy_enum(x, y, z),
                         expected,
                         "lazy_enum({x}, {y}, {z})"
+                    );
+                    assert_eq!(
+                        super::tarai_lazy_enum_checked(x, y, z),
+                        Some(expected),
+                        "lazy_enum_checked({x}, {y}, {z})"
                     );
                 }
             }

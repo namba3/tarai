@@ -24,7 +24,7 @@ T(x, y, z) =
 - クロージャーを使った遅延評価
 - enum を使った遅延評価
 
-メモ化版には、減算のアンダーフローを検出する `tarai_memo_checked` もあります。計算途中で `i32` の範囲を超える減算が必要になった場合は `None` を返し、それ以外は `Some(結果)` を返します。
+各方式には、減算のアンダーフローを検出する checked 版もあります。`tarai_naive_checked`、`tarai_memo_checked`、`tarai_lazy_closure_checked`、`tarai_lazy_enum_checked` は、計算途中で `i32` の範囲を超える減算が必要になった場合に `None` を返し、それ以外は `Some(結果)` を返します。
 
 ```rust
 assert_eq!(tarai::tarai_memo_checked(10, 5, 0), Some(10));
