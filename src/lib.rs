@@ -2,6 +2,19 @@
 ///
 /// 入力が大きい場合、同じ計算を繰り返すため非常に時間がかかることがあります。
 /// すべての中間値が `i32` の範囲に収まる入力を指定してください。
+///
+/// # 使用例
+///
+/// ```
+/// use tarai::{tarai_lazy_closure, tarai_lazy_enum, tarai_memo, tarai_naive};
+///
+/// let input = (10, 5, 0);
+/// let expected = tarai_naive(input.0, input.1, input.2);
+/// assert_eq!(expected, 10);
+/// assert_eq!(tarai_memo(input.0, input.1, input.2), expected);
+/// assert_eq!(tarai_lazy_closure(input.0, input.1, input.2), expected);
+/// assert_eq!(tarai_lazy_enum(input.0, input.1, input.2), expected);
+/// ```
 pub fn tarai_naive(x: i32, y: i32, z: i32) -> i32 {
     if x <= y {
         y
