@@ -262,6 +262,16 @@ pub fn tarai_lazy_enum_checked(x: i32, y: i32, z: i32) -> Option<i32> {
 
 #[cfg(test)]
 mod tests {
+    fn expected_by_ordering_rule(x: i32, y: i32, z: i32) -> i32 {
+        if x <= y {
+            y
+        } else if y <= z {
+            z
+        } else {
+            x
+        }
+    }
+
     const CASES: [((i32, i32, i32), i32); 8] = [
         ((0, 0, 0), 0),
         ((1, 2, 3), 2),
@@ -431,7 +441,12 @@ mod tests {
         for x in -3..=3 {
             for y in -3..=3 {
                 for z in -3..=3 {
-                    let expected = super::tarai_naive(x, y, z);
+                    let expected = expected_by_ordering_rule(x, y, z);
+                    assert_eq!(
+                        super::tarai_naive(x, y, z),
+                        expected,
+                        "naive({x}, {y}, {z})"
+                    );
                     assert_eq!(super::tarai_memo(x, y, z), expected, "memo({x}, {y}, {z})");
                     assert_eq!(
                         super::tarai_naive_checked(x, y, z),
