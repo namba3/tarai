@@ -1,6 +1,5 @@
 use std::{
     hint::black_box,
-    process::Command,
     time::{Duration, Instant},
 };
 
@@ -49,7 +48,7 @@ const WARMUP_ROUNDS: usize = 2;
 const SAMPLE_ROUNDS: usize = 7;
 
 fn main() {
-    println!("Rust: {}", rustc_version());
+    println!("Rust: {}", env!("RUSTC_VERSION"));
     println!(
         "Target: {}-{}",
         std::env::consts::ARCH,
@@ -113,17 +112,6 @@ fn benchmark<T>(
     println!(
         "{name}({x}, {y}, {z}): median {median:.2} ns/call, range {minimum:.2}–{maximum:.2}, {iterations} iterations/sample; samples=[{samples}]"
     );
-}
-
-fn rustc_version() -> String {
-    let compiler = std::env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
-    Command::new(compiler)
-        .arg("--version")
-        .output()
-        .ok()
-        .filter(|output| output.status.success())
-        .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_owned())
-        .unwrap_or_else(|| "unknown".to_owned())
 }
 
 fn calibrate_iterations<T>(implementation: fn(i32, i32, i32) -> T, x: i32, y: i32, z: i32) -> u64 {
