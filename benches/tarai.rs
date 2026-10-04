@@ -6,41 +6,17 @@ use std::{
 type TaraiFn = fn(i32, i32, i32) -> i32;
 type CheckedTaraiFn = fn(i32, i32, i32) -> Option<i32>;
 
-const CASES: [((i32, i32, i32), &str, TaraiFn, i32); 8] = [
-    ((10, 5, 0), "tarai_naive", tarai::tarai_naive, 10),
-    ((12, 6, 0), "tarai_naive", tarai::tarai_naive, 12),
-    ((10, 5, 0), "tarai_memo", tarai::tarai_memo, 10),
-    ((12, 6, 0), "tarai_memo", tarai::tarai_memo, 12),
-    (
-        (10, 5, 0),
-        "tarai_lazy_closure",
-        tarai::tarai_lazy_closure,
-        10,
-    ),
-    (
-        (12, 6, 0),
-        "tarai_lazy_closure",
-        tarai::tarai_lazy_closure,
-        12,
-    ),
-    ((10, 5, 0), "tarai_lazy_enum", tarai::tarai_lazy_enum, 10),
-    ((12, 6, 0), "tarai_lazy_enum", tarai::tarai_lazy_enum, 12),
+const CASES: [((i32, i32, i32), i32); 2] = [((10, 5, 0), 10), ((12, 6, 0), 12)];
+
+const IMPLEMENTATIONS: [(&str, TaraiFn); 4] = [
+    ("tarai_naive", tarai::tarai_naive),
+    ("tarai_memo", tarai::tarai_memo),
+    ("tarai_lazy_closure", tarai::tarai_lazy_closure),
+    ("tarai_lazy_enum", tarai::tarai_lazy_enum),
 ];
 
-const CHECKED_CASES: [((i32, i32, i32), &str, CheckedTaraiFn, Option<i32>); 2] = [
-    (
-        (10, 5, 0),
-        "tarai_memo_checked",
-        tarai::tarai_memo_checked,
-        Some(10),
-    ),
-    (
-        (12, 6, 0),
-        "tarai_memo_checked",
-        tarai::tarai_memo_checked,
-        Some(12),
-    ),
-];
+const CHECKED_IMPLEMENTATIONS: [(&str, CheckedTaraiFn); 1] =
+    [("tarai_memo_checked", tarai::tarai_memo_checked)];
 
 const TARGET_SAMPLE_TIME: Duration = Duration::from_millis(100);
 const MAX_ITERATIONS: u64 = 1 << 24;
@@ -64,12 +40,16 @@ fn main() {
     );
     println!("Benchmark results (nanoseconds per call):");
 
-    for &((x, y, z), name, implementation, expected) in &CASES {
-        benchmark(x, y, z, name, implementation, expected);
+    for &(name, implementation) in &IMPLEMENTATIONS {
+        for &((x, y, z), expected) in &CASES {
+            benchmark(x, y, z, name, implementation, expected);
+        }
     }
 
-    for &((x, y, z), name, implementation, expected) in &CHECKED_CASES {
-        benchmark(x, y, z, name, implementation, expected);
+    for &(name, implementation) in &CHECKED_IMPLEMENTATIONS {
+        for &((x, y, z), expected) in &CASES {
+            benchmark(x, y, z, name, implementation, Some(expected));
+        }
     }
 }
 
