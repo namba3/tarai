@@ -24,6 +24,13 @@ This repository implements the Tak (Tarai) function in four ways:
 - Lazy evaluation using closures
 - Lazy evaluation using an enum
 
+The memoized implementation also has a checked variant, `tarai_memo_checked`. It returns `None` if a subtraction during evaluation would underflow `i32`; otherwise, it returns `Some(result)`.
+
+```rust
+assert_eq!(tarai::tarai_memo_checked(10, 5, 0), Some(10));
+assert_eq!(tarai::tarai_memo_checked(i32::MIN + 1, i32::MIN, 0), None);
+```
+
 ## Usage
 
 Call a library function to evaluate the Tak function:
