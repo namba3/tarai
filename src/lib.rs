@@ -101,24 +101,27 @@ pub fn tarai_lazy_enum(x: i32, y: i32, z: i32) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    macro_rules! case {
-        (a $case:ident, $fn:ident, $outs:expr, ($($ins:expr),*)) => {
-            #[test]
-            fn $case() {
-                let expected = $outs;
-                let actual = super::super::$fn($($ins),*);
-                assert_eq!(actual, expected);
-            }
-        };
-        ($case:ident, $fn:ident, $ins:tt, $outs:expr) => {
-            case!(a $case, $fn, $outs, $ins);
-        }
-    }
+    const CASES: [((i32, i32, i32), i32); 8] = [
+        ((0, 0, 0), 0),
+        ((1, 2, 3), 2),
+        ((-1, 0, -2), 0),
+        ((2, 1, 0), 2),
+        ((3, 2, 1), 3),
+        ((3, 1, 2), 2),
+        ((10, 5, 0), 10),
+        ((12, 6, 0), 12),
+    ];
+
     macro_rules! test {
         ($fn:ident) => {
             mod $fn {
-                case!(case_1, $fn, (10, 5, 0), 10);
-                case!(case_2, $fn, (12, 6, 0), 12);
+                #[test]
+                fn matches_expected_cases() {
+                    for &((x, y, z), expected) in super::CASES.iter() {
+                        let actual = super::super::$fn(x, y, z);
+                        assert_eq!(actual, expected, "{}({}, {}, {})", stringify!($fn), x, y, z);
+                    }
+                }
             }
         };
     }
