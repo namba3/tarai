@@ -428,9 +428,9 @@ mod tests {
 
     #[test]
     fn implementations_match_on_small_input_domain() {
-        for x in -2..=3 {
-            for y in -2..=3 {
-                for z in -2..=3 {
+        for x in -3..=3 {
+            for y in -3..=3 {
+                for z in -3..=3 {
                     let expected = super::tarai_naive(x, y, z);
                     assert_eq!(super::tarai_memo(x, y, z), expected, "memo({x}, {y}, {z})");
                     assert_eq!(
