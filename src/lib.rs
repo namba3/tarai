@@ -56,6 +56,34 @@ pub fn tarai_memo(x: i32, y: i32, z: i32) -> i32 {
     t(x, y, z, &mut memo)
 }
 
+/// 竹内関数をメモ化再帰で計算し、中間値の減算アンダーフローを検出します。
+///
+/// `i32` の減算が範囲外になる場合は `None` を返します。メモは呼び出しごとに作成されます。
+pub fn tarai_memo_checked(x: i32, y: i32, z: i32) -> Option<i32> {
+    use std::collections::HashMap;
+
+    fn t(x: i32, y: i32, z: i32, memo: &mut HashMap<(i32, i32, i32), i32>) -> Option<i32> {
+        let key = (x, y, z);
+        if let Some(&value) = memo.get(&key) {
+            return Some(value);
+        }
+
+        let result = if x <= y {
+            y
+        } else {
+            let a = t(x.checked_sub(1)?, y, z, memo)?;
+            let b = t(y.checked_sub(1)?, z, x, memo)?;
+            let c = t(z.checked_sub(1)?, x, y, memo)?;
+            t(a, b, c, memo)?
+        };
+
+        memo.insert(key, result);
+        Some(result)
+    }
+
+    t(x, y, z, &mut HashMap::new())
+}
+
 /// 第 3 引数をクロージャーで遅延評価しながら竹内関数を計算します。
 ///
 /// すべての中間値が `i32` の範囲に収まる入力を指定してください。
@@ -142,6 +170,26 @@ mod tests {
     test!(tarai_memo);
     test!(tarai_lazy_closure);
     test!(tarai_lazy_enum);
+
+    #[test]
+    fn checked_memo_matches_expected_cases() {
+        for &((x, y, z), expected) in CASES.iter() {
+            assert_eq!(super::tarai_memo_checked(x, y, z), Some(expected));
+        }
+    }
+
+    #[test]
+    fn checked_memo_reports_subtraction_underflow() {
+        assert_eq!(super::tarai_memo_checked(i32::MIN + 1, i32::MIN, 0), None);
+    }
+
+    #[test]
+    fn checked_memo_accepts_extreme_base_case() {
+        assert_eq!(
+            super::tarai_memo_checked(i32::MIN, i32::MIN, i32::MIN),
+            Some(i32::MIN)
+        );
+    }
 
     #[test]
     fn implementations_match_on_small_input_domain() {
