@@ -360,8 +360,12 @@ mod tests {
     }
 
     #[test]
-    fn checked_implementations_accept_unused_minimum_argument_in_base_case() {
+    fn implementations_accept_unused_minimum_argument_in_base_case() {
         let input = (0, 1, i32::MIN);
+        assert_eq!(super::tarai_naive(input.0, input.1, input.2), 1);
+        assert_eq!(super::tarai_memo(input.0, input.1, input.2), 1);
+        assert_eq!(super::tarai_lazy_closure(input.0, input.1, input.2), 1);
+        assert_eq!(super::tarai_lazy_enum(input.0, input.1, input.2), 1);
         assert_eq!(
             super::tarai_naive_checked(input.0, input.1, input.2),
             Some(1)
