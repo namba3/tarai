@@ -40,26 +40,17 @@ pub fn tarai_memo(x: i32, y: i32, z: i32) -> i32 {
             return *v;
         }
 
-        if x <= y {
+        let result = if x <= y {
             y
         } else {
-            macro_rules! get_or_call {
-                ($x:expr,$y:expr,$z:expr) => {
-                    if let Some(v) = memo.get(&($x, $y, $z)) {
-                        *v
-                    } else {
-                        let v = t($x, $y, $z, memo);
-                        memo.insert(($x, $y, $z), v);
-                        v
-                    }
-                };
-            }
+            let a = t(x - 1, y, z, memo);
+            let b = t(y - 1, z, x, memo);
+            let c = t(z - 1, x, y, memo);
+            t(a, b, c, memo)
+        };
 
-            let a = get_or_call!(x - 1, y, z);
-            let b = get_or_call!(y - 1, z, x);
-            let c = get_or_call!(z - 1, x, y);
-            get_or_call!(a, b, c)
-        }
+        memo.insert((x, y, z), result);
+        result
     }
 
     t(x, y, z, &mut memo)
