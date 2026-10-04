@@ -399,6 +399,34 @@ mod tests {
     }
 
     #[test]
+    fn implementations_match_near_maximum_recursive_case() {
+        let input = (i32::MAX, i32::MAX - 1, i32::MAX - 2);
+        assert_eq!(super::tarai_naive(input.0, input.1, input.2), i32::MAX);
+        assert_eq!(super::tarai_memo(input.0, input.1, input.2), i32::MAX);
+        assert_eq!(
+            super::tarai_lazy_closure(input.0, input.1, input.2),
+            i32::MAX
+        );
+        assert_eq!(super::tarai_lazy_enum(input.0, input.1, input.2), i32::MAX);
+        assert_eq!(
+            super::tarai_naive_checked(input.0, input.1, input.2),
+            Some(i32::MAX)
+        );
+        assert_eq!(
+            super::tarai_memo_checked(input.0, input.1, input.2),
+            Some(i32::MAX)
+        );
+        assert_eq!(
+            super::tarai_lazy_closure_checked(input.0, input.1, input.2),
+            Some(i32::MAX)
+        );
+        assert_eq!(
+            super::tarai_lazy_enum_checked(input.0, input.1, input.2),
+            Some(i32::MAX)
+        );
+    }
+
+    #[test]
     fn implementations_match_on_small_input_domain() {
         for x in -2..=3 {
             for y in -2..=3 {
