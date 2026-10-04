@@ -6,15 +6,25 @@ use std::{
 
 type TaraiFn = fn(i32, i32, i32) -> i32;
 
-const CASES: [((i32, i32, i32), &str, TaraiFn); 8] = [
-    ((10, 5, 0), "tarai_naive", tarai::tarai_naive),
-    ((12, 6, 0), "tarai_naive", tarai::tarai_naive),
-    ((10, 5, 0), "tarai_memo", tarai::tarai_memo),
-    ((12, 6, 0), "tarai_memo", tarai::tarai_memo),
-    ((10, 5, 0), "tarai_lazy_closure", tarai::tarai_lazy_closure),
-    ((12, 6, 0), "tarai_lazy_closure", tarai::tarai_lazy_closure),
-    ((10, 5, 0), "tarai_lazy_enum", tarai::tarai_lazy_enum),
-    ((12, 6, 0), "tarai_lazy_enum", tarai::tarai_lazy_enum),
+const CASES: [((i32, i32, i32), &str, TaraiFn, i32); 8] = [
+    ((10, 5, 0), "tarai_naive", tarai::tarai_naive, 10),
+    ((12, 6, 0), "tarai_naive", tarai::tarai_naive, 12),
+    ((10, 5, 0), "tarai_memo", tarai::tarai_memo, 10),
+    ((12, 6, 0), "tarai_memo", tarai::tarai_memo, 12),
+    (
+        (10, 5, 0),
+        "tarai_lazy_closure",
+        tarai::tarai_lazy_closure,
+        10,
+    ),
+    (
+        (12, 6, 0),
+        "tarai_lazy_closure",
+        tarai::tarai_lazy_closure,
+        12,
+    ),
+    ((10, 5, 0), "tarai_lazy_enum", tarai::tarai_lazy_enum, 10),
+    ((12, 6, 0), "tarai_lazy_enum", tarai::tarai_lazy_enum, 12),
 ];
 
 const TARGET_SAMPLE_TIME: Duration = Duration::from_millis(100);
@@ -39,7 +49,13 @@ fn main() {
     );
     println!("Benchmark results (nanoseconds per call):");
 
-    for &((x, y, z), name, implementation) in &CASES {
+    for &((x, y, z), name, implementation, expected) in &CASES {
+        assert_eq!(
+            implementation(x, y, z),
+            expected,
+            "{name}({x}, {y}, {z}) returned an unexpected result; refusing to benchmark"
+        );
+
         let iterations = calibrate_iterations(implementation, x, y, z);
 
         for _ in 0..WARMUP_ROUNDS {
