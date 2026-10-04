@@ -3,7 +3,12 @@ use std::{
     time::{Duration, Instant},
 };
 
-const CASES: [((i32, i32, i32), i32); 2] = [((10, 5, 0), 10), ((12, 6, 0), 12)];
+const CASES: [((i32, i32, i32), i32); 4] = [
+    ((10, 7, 4), 10),
+    ((10, 5, 3), 10),
+    ((10, 5, 0), 10),
+    ((12, 6, 0), 12),
+];
 
 macro_rules! benchmark_unchecked_cases {
     ($name:literal, $implementation:path) => {
