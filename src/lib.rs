@@ -314,6 +314,18 @@ mod tests {
             super::tarai_lazy_enum_checked(i32::MIN + 1, i32::MIN, 0),
             None
         );
+
+        let input = (i32::MIN + 2, i32::MIN + 1, i32::MIN);
+        assert_eq!(super::tarai_naive_checked(input.0, input.1, input.2), None);
+        assert_eq!(super::tarai_memo_checked(input.0, input.1, input.2), None);
+        assert_eq!(
+            super::tarai_lazy_closure_checked(input.0, input.1, input.2),
+            None
+        );
+        assert_eq!(
+            super::tarai_lazy_enum_checked(input.0, input.1, input.2),
+            None
+        );
     }
 
     #[test]
