@@ -185,7 +185,7 @@ pub fn tarai_lazy_enum(x: i32, y: i32, z: i32) -> i32 {
         Result(i32),
     }
     impl V {
-        pub fn eval(self) -> i32 {
+        fn eval(self) -> i32 {
             match self {
                 V::Args { x, y, z } => t(x, y, V::Result(z)),
                 V::Result(v) => v,
