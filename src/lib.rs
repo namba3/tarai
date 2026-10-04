@@ -1,4 +1,7 @@
-/// 実直な再帰での実装
+/// 竹内関数を素朴な再帰で計算します。
+///
+/// 入力が大きい場合、同じ計算を繰り返すため非常に時間がかかることがあります。
+/// すべての中間値が `i32` の範囲に収まる入力を指定してください。
 pub fn tarai_naive(x: i32, y: i32, z: i32) -> i32 {
     if x <= y {
         y
@@ -11,7 +14,10 @@ pub fn tarai_naive(x: i32, y: i32, z: i32) -> i32 {
     }
 }
 
-/// メモ化再帰での実装
+/// 竹内関数をメモ化再帰で計算します。
+///
+/// メモは呼び出しごとに作成されます。大きな入力ではメモリ使用量が増えることがあります。
+/// すべての中間値が `i32` の範囲に収まる入力を指定してください。
 pub fn tarai_memo(x: i32, y: i32, z: i32) -> i32 {
     use std::collections::HashMap;
     let mut memo = HashMap::new();
@@ -46,7 +52,9 @@ pub fn tarai_memo(x: i32, y: i32, z: i32) -> i32 {
     t(x, y, z, &mut memo)
 }
 
-/// 遅延評価での実装 (クロージャー使用)
+/// 第 3 引数をクロージャーで遅延評価しながら竹内関数を計算します。
+///
+/// すべての中間値が `i32` の範囲に収まる入力を指定してください。
 pub fn tarai_lazy_closure(x: i32, y: i32, z: i32) -> i32 {
     fn t(x: i32, y: i32, z: &dyn Fn() -> i32) -> i32 {
         if x <= y {
@@ -63,7 +71,9 @@ pub fn tarai_lazy_closure(x: i32, y: i32, z: i32) -> i32 {
     t(x, y, &|| z)
 }
 
-/// 遅延評価での実装 (enum 使用)
+/// 第 3 引数を enum で遅延評価しながら竹内関数を計算します。
+///
+/// すべての中間値が `i32` の範囲に収まる入力を指定してください。
 pub fn tarai_lazy_enum(x: i32, y: i32, z: i32) -> i32 {
     enum V {
         Args { x: i32, y: i32, z: i32 },
@@ -128,4 +138,26 @@ mod tests {
     test!(tarai_memo);
     test!(tarai_lazy_closure);
     test!(tarai_lazy_enum);
+
+    #[test]
+    fn implementations_match_on_small_input_domain() {
+        for x in -1..=2 {
+            for y in -1..=2 {
+                for z in -1..=2 {
+                    let expected = super::tarai_naive(x, y, z);
+                    assert_eq!(super::tarai_memo(x, y, z), expected, "memo({x}, {y}, {z})");
+                    assert_eq!(
+                        super::tarai_lazy_closure(x, y, z),
+                        expected,
+                        "lazy_closure({x}, {y}, {z})"
+                    );
+                    assert_eq!(
+                        super::tarai_lazy_enum(x, y, z),
+                        expected,
+                        "lazy_enum({x}, {y}, {z})"
+                    );
+                }
+            }
+        }
+    }
 }
