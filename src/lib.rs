@@ -30,6 +30,15 @@ pub fn tarai_naive(x: i32, y: i32, z: i32) -> i32 {
 /// 竹内関数を素朴な再帰で計算し、中間値の減算アンダーフローを検出します。
 ///
 /// `i32` の減算が範囲外になる場合は `None` を返します。
+///
+/// # 使用例
+///
+/// ```
+/// use tarai::tarai_naive_checked;
+///
+/// assert_eq!(tarai_naive_checked(10, 5, 0), Some(10));
+/// assert_eq!(tarai_naive_checked(i32::MIN + 1, i32::MIN, 0), None);
+/// ```
 pub fn tarai_naive_checked(x: i32, y: i32, z: i32) -> Option<i32> {
     fn t(x: i32, y: i32, z: i32) -> Option<i32> {
         if x <= y {
@@ -77,6 +86,15 @@ pub fn tarai_memo(x: i32, y: i32, z: i32) -> i32 {
 /// 竹内関数をメモ化再帰で計算し、中間値の減算アンダーフローを検出します。
 ///
 /// `i32` の減算が範囲外になる場合は `None` を返します。メモは呼び出しごとに作成されます。
+///
+/// # 使用例
+///
+/// ```
+/// use tarai::tarai_memo_checked;
+///
+/// assert_eq!(tarai_memo_checked(10, 5, 0), Some(10));
+/// assert_eq!(tarai_memo_checked(i32::MIN + 1, i32::MIN, 0), None);
+/// ```
 pub fn tarai_memo_checked(x: i32, y: i32, z: i32) -> Option<i32> {
     use std::collections::HashMap;
 
@@ -124,6 +142,15 @@ pub fn tarai_lazy_closure(x: i32, y: i32, z: i32) -> i32 {
 /// 第 3 引数をクロージャーで遅延評価し、減算アンダーフローを検出して竹内関数を計算します。
 ///
 /// `i32` の減算が範囲外になる場合は `None` を返します。
+///
+/// # 使用例
+///
+/// ```
+/// use tarai::tarai_lazy_closure_checked;
+///
+/// assert_eq!(tarai_lazy_closure_checked(10, 5, 0), Some(10));
+/// assert_eq!(tarai_lazy_closure_checked(i32::MIN + 1, i32::MIN, 0), None);
+/// ```
 pub fn tarai_lazy_closure_checked(x: i32, y: i32, z: i32) -> Option<i32> {
     fn t(x: i32, y: i32, z: &dyn Fn() -> Option<i32>) -> Option<i32> {
         if x <= y {
@@ -179,6 +206,15 @@ pub fn tarai_lazy_enum(x: i32, y: i32, z: i32) -> i32 {
 /// 第 3 引数を enum で遅延評価し、減算アンダーフローを検出して竹内関数を計算します。
 ///
 /// `i32` の減算が範囲外になる場合は `None` を返します。
+///
+/// # 使用例
+///
+/// ```
+/// use tarai::tarai_lazy_enum_checked;
+///
+/// assert_eq!(tarai_lazy_enum_checked(10, 5, 0), Some(10));
+/// assert_eq!(tarai_lazy_enum_checked(i32::MIN + 1, i32::MIN, 0), None);
+/// ```
 pub fn tarai_lazy_enum_checked(x: i32, y: i32, z: i32) -> Option<i32> {
     enum V {
         Args { x: i32, y: i32, z: i32 },
