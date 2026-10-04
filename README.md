@@ -11,8 +11,8 @@
 
 ## ベンチマーク
 
-ベンチマークには nightly Rust が必要です。
+stable Rust で実行できます。
 
 ```sh
-cargo +nightly bench
+cargo bench
 ```

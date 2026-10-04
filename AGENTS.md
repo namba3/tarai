@@ -19,12 +19,12 @@
 
 ## 確認方法
 
-`src/lib.rs` は nightly 専用の `test` feature を使うため、テストとベンチマークには nightly Rust を使う。
+テストとベンチマークは stable Rust で実行する。ベンチマークは `benches/tarai.rs` の独自ハーネスで計測する。
 
 ```sh
-cargo +nightly fmt --check
-cargo +nightly test
-cargo +nightly bench
+cargo fmt --check
+cargo test
+cargo bench
 ```
 
 変更内容に応じて必要な確認を選ぶ。性能比較を報告するときは、実行環境と入力ケースを併記し、測定していない結果を推定値として明示する。

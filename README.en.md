@@ -11,8 +11,8 @@ This repository implements the Tak (Tarai) function in four ways:
 
 ## Benchmark
 
-Nightly Rust is required to run the benchmarks.
+The benchmarks run on stable Rust.
 
 ```sh
-cargo +nightly bench
+cargo bench
 ```

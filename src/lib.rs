@@ -1,5 +1,3 @@
-#![feature(test)]
-
 /// 実直な再帰での実装
 pub fn tarai_naive(x: i32, y: i32, z: i32) -> i32 {
     if x <= y {
@@ -130,33 +128,4 @@ mod tests {
     test!(tarai_memo);
     test!(tarai_lazy_closure);
     test!(tarai_lazy_enum);
-}
-
-#[cfg(test)]
-mod benchs {
-    macro_rules! case {
-        ($case:ident, $fn:ident, ($($ins:expr),*)) => {
-            #[bench]
-            fn $case(b: &mut test::Bencher) {
-                let (x,y,z) = ($($ins),*);
-                b.iter(|| {
-                    super::super::$fn(x, y, z)
-                })
-            }
-        };
-    }
-    macro_rules! bench {
-        ($fn:ident) => {
-            mod $fn {
-                extern crate test;
-                case!(case_10_5_0, $fn, (10, 5, 0));
-                case!(case_12_6_0, $fn, (12, 6, 0));
-            }
-        };
-    }
-
-    bench!(tarai_naive);
-    bench!(tarai_memo);
-    bench!(tarai_lazy_closure);
-    bench!(tarai_lazy_enum);
 }
