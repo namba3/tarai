@@ -55,6 +55,9 @@ cargo test
 The benchmarks run on stable Rust. Each case is warmed up twice, then measured
 seven times; the median and range are reported.
 Implementations are called through static dispatch, without function pointers.
+Normal cases scale `x` and `y` from `(6, 3, 0)` through `(14, 7, 0)`, and also
+vary `y` and `z` while keeping `x = 10`. Every implementation uses the same
+inputs.
 Checked variants are also measured on a subtraction-underflow case.
 
 ```sh
