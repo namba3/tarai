@@ -135,3 +135,7 @@ implementations return `None`. Their median times were:
 | Naive recursion | Memoized recursion | Closure lazy evaluation | Enum lazy evaluation |
 |---:|---:|---:|---:|
 | 3.03 ns | 33.86 ns | 4.42 ns | 3.87 ns |
+
+## License
+
+This project is available under the terms of either the [MIT License](LICENSE-MIT) or the [Apache License, Version 2.0](LICENSE-APACHE).

@@ -120,3 +120,7 @@ checked 版で減算アンダーフローが発生する入力 `(i32::MIN + 1, i
 | 素朴な再帰 | メモ化再帰 | クロージャー遅延評価 | enum 遅延評価 |
 |---:|---:|---:|---:|
 | 3.03 ns | 33.86 ns | 4.42 ns | 3.87 ns |
+
+## ライセンス
+
+このプロジェクトは、[MIT License](LICENSE-MIT) または [Apache License, Version 2.0](LICENSE-APACHE) のいずれかの条件で利用できます。
