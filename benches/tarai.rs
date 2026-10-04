@@ -9,6 +9,7 @@ const CASES: [((i32, i32, i32), i32); 4] = [
     ((10, 5, 0), 10),
     ((12, 6, 0), 12),
 ];
+const UNDERFLOW_CASES: [((i32, i32, i32), Option<i32>); 1] = [((i32::MIN + 1, i32::MIN, 0), None)];
 
 macro_rules! benchmark_unchecked_cases {
     ($name:literal, $implementation:path) => {
@@ -22,6 +23,9 @@ macro_rules! benchmark_checked_cases {
     ($name:literal, $implementation:path) => {
         for &((x, y, z), expected) in &CASES {
             benchmark(x, y, z, $name, $implementation, Some(expected));
+        }
+        for &((x, y, z), expected) in &UNDERFLOW_CASES {
+            benchmark(x, y, z, $name, $implementation, expected);
         }
     };
 }
